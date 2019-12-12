@@ -14,7 +14,7 @@ def to_mls(sklearn_model: sklearn.base.BaseEstimator):
     model.executes = implementation
 
     model.input_values = [
-        mls.HyperParameterSetting(value=val, specified_by=key)
+        mls.HyperParameterSetting(id='{}Setting'.format(key), value=val, specified_by=key)
         for key, val in params.items() if val is not None
     ]
 
