@@ -1,5 +1,5 @@
 import pytest
-from model import to_mls
+from mlsconverters.sklearn import to_mls
 import json
 import itertools
 
