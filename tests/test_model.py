@@ -10,6 +10,7 @@ from sklearn.linear_model import LogisticRegression, LogisticRegressionCV, \
     OrthogonalMatchingPursuitCV, ARDRegression, BayesianRidge, HuberRegressor, RANSACRegressor, \
     TheilSenRegressor, PassiveAggressiveRegressor
 from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import RandomizedSearchCV
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.gaussian_process import GaussianProcessClassifier
@@ -18,6 +19,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+from scipy.stats import uniform
 
 @pytest.mark.parametrize("sklearn_model", [
     LogisticRegression(random_state=0),
@@ -58,10 +60,16 @@ from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
     AdaBoostClassifier(),
     GaussianNB(),
     QuadraticDiscriminantAnalysis(),
+    RandomizedSearchCV(
+        LogisticRegression(solver='saga', tol=1e-2, max_iter=200, random_state=0),
+        dict(C=uniform(loc=0, scale=4), penalty=['l2', 'l1']),
+        random_state=0
+    ),
 ])
 def test_to_mls(sklearn_model):
     sklearn_model.fit(
         [[i+j, i+j] for i, j in itertools.product(range(5), range(3))],
         list(itertools.chain.from_iterable(itertools.repeat([0, 1, 2], 5)))
     )
-    json.dumps(to_mls(sklearn_model))
+    s=json.dumps(to_mls(sklearn_model))
+    json.loads(s)
