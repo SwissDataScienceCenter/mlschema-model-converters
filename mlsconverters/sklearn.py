@@ -22,17 +22,17 @@ def to_mls(sklearn_model: sklearn.base.BaseEstimator):
             xsd_type = "xsd:string"
         return {'@type': xsd_type, '@value': v}
 
-    def is_numeric_and_is_nan(x):
-        try:
-            return np.isnan(x)
-        finally:
-            return False
+    def normalize_float(v):
+        if isinstance(v, float) and (np.isnan(v) or np.isinf(v)):
+            return str(v)
+        else:
+            return v
 
     def standardize_types(v):
         if isinstance(v, np.ndarray):
-            return v.tolist()
-        elif is_numeric_and_is_nan(v):
-            return 'NaN'
+            return [normalize_float(x) for x in v.tolist()]
+        elif isinstance(v, float):
+            return normalize_float(v)
         elif isinstance(v, rv_frozen):
             return {'dist_name': v.dist.name, 'args': v.args, 'kwds': v.kwds}
         return v
