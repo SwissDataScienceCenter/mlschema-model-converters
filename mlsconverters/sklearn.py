@@ -33,30 +33,29 @@ def to_mls(sklearn_model: sklearn.base.BaseEstimator):
             return [normalize_float(x) for x in v.tolist()]
         elif isinstance(v, float):
             return normalize_float(v)
+        elif callable(v):
+            return str(v) # TODO
         elif isinstance(v, rv_frozen):
             return {'dist_name': v.dist.name, 'args': v.args, 'kwds': v.kwds}
         return v
 
     def deep_get_params(params):
-        d = {}
-
-        for k, v in params.items():
-            if isinstance(v, dict):
-                d[k] = deep_get_params(v)
-            else:
-                d[k] = standardize_types(v)
-
-        for k, v in d.items():
+        if isinstance(params, (list, tuple)):
+           return [deep_get_params(x) for x in params]
+        elif isinstance(params, dict):
+           return {k: deep_get_params(v) for k, v in params.items()}
+        else:
+            v = standardize_types(params)
             try:
                 p = v.get_params()
                 t = type(v).__module__ + '.' + type(v).__name__
-                d[k] = {'@value': {'type': t, 'params': deep_get_params(p)}}
+                return {'@value': {'type': t, 'params': deep_get_params(p)}}
             except AttributeError:
                 try:
                     json.dumps(v)
+                    return v
                 except TypeError as e:
                     raise NotImplementedError("can't convert sklearn model of type {} to mls: {}".format(type(sklearn_model), e))
-        return d
 
     params = deep_get_params(params)
 

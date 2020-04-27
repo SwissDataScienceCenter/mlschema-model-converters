@@ -11,6 +11,9 @@ from sklearn.linear_model import LogisticRegression, LogisticRegressionCV, \
     TheilSenRegressor, PassiveAggressiveRegressor
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import RandomizedSearchCV, GridSearchCV
+from sklearn.pipeline import Pipeline
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import f_regression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.gaussian_process import GaussianProcessClassifier
@@ -66,6 +69,7 @@ from scipy.stats import uniform
         random_state=0
     ),
     GridSearchCV(SVC(), {'kernel':('linear', 'rbf'), 'C':[1, 10]}),
+    Pipeline([('anova', SelectKBest(f_regression, k=1)), ('svc', SVC(kernel='linear'))]),
 ])
 def test_to_mls(sklearn_model):
     sklearn_model.fit(
