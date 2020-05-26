@@ -6,6 +6,19 @@ from mls.config import MLS_DIR, MLS_METADATA_FILE
 from . import sklearn
 
 
+def _extract_mls(model):
+    if model.__module__.startswith("sklearn"):
+        return sklearn.to_mls(model)
+    else:
+        raise ValueError("Unsupported library")
+
+
+def export_to_file(model, filename):
+    mls = _extract_mls(model)
+    with open(filename, 'w') as f:
+        json.dump(mls, f)
+
+
 def export(model, force=False):
     if 'RENKU_HOME' in os.environ:
         renku_project_root = os.environ['RENKU_HOME']
@@ -17,10 +30,7 @@ def export(model, force=False):
         # hence NOP
         return
 
-    if model.__module__.startswith("sklearn"):
-        mls = sklearn.to_mls(model)
-    else:
-        raise ValueError("Unsupported library")
+    mls = _extract_mls(model)
 
     path = Path(os.path.join(renku_project_root, MLS_DIR, str(model.__hash__())))
     if not path.exists():
