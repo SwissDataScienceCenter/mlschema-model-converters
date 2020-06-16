@@ -1,7 +1,7 @@
 import os
 from setuptools import find_packages, setup
 
-install_requires = ['mls', 'scikit-learn']
+install_requires = ['scikit-learn', 'mls @ git+https://github.com/ratschlab/renku-mls@master']
 packages = find_packages()
 version_file = open('VERSION')
 
@@ -14,7 +14,7 @@ setup(
     author_email='viktor.gal@maeth.com',
     install_requires=install_requires,
     packages=packages,
-    tests_require=['pytest>=4.0.0'],
+    tests_require=['pytest>=4.0.0', 'tox', 'auto-sklearn'],
     zip_safe=False,
     include_package_data=True,
     platforms='any',
