@@ -9,6 +9,8 @@ from . import sklearn
 def _extract_mls(model):
     if model.__module__.startswith("sklearn"):
         return sklearn.to_mls(model)
+    elif model.__module__.startswith("autosklearn"):
+        return sklearn.to_mls(model) # TODO
     else:
         raise ValueError("Unsupported library")
 
