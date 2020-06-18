@@ -2,6 +2,7 @@ import pytest
 from mlsconverters import _extract_mls
 import json
 import itertools
+import tempfile
 
 from sklearn.linear_model import LogisticRegression, LogisticRegressionCV, \
     PassiveAggressiveClassifier, Perceptron, RidgeClassifier, RidgeClassifierCV, \
@@ -88,18 +89,19 @@ from autosklearn.constants import MULTICLASS_CLASSIFICATION
 
 @pytest.mark.filterwarnings('ignore')
 def test_autosklearn_to_mls():
-    backend = create(
-        '/tmp/autosklearn_regression_example_tmp', # TODO use tempfile.TemporaryDirectory
-        '/tmp/autosklearn_regression_example_out',
-        delete_tmp_folder_after_terminate=True,
-        delete_output_folder_after_terminate=True,
-    )
-    X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
-    automl = autosklearn.automl.AutoML(backend, 20, 5)
-    automl.fit(
-        X_train, Y_train, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
-    )
-    score = automl.score(X_test, Y_test)
-    s=json.dumps(_extract_mls(automl), allow_nan=False)
-    json.loads(s)
-    # TODO asserts?
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        backend = create(
+            tmp_dir + '_autosklearn_tmp/',
+            tmp_dir + '_autosklearn_out/',
+            delete_tmp_folder_after_terminate=True,
+            delete_output_folder_after_terminate=True,
+        )
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+        automl = autosklearn.automl.AutoML(backend, 20, 5)
+        automl.fit(
+            X_train, Y_train, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
+        )
+        score = automl.score(X_test, Y_test)
+        s=json.dumps(_extract_mls(automl), allow_nan=False)
+        json.loads(s)
+        # TODO asserts?
