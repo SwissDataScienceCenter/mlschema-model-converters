@@ -89,7 +89,7 @@ from autosklearn.constants import MULTICLASS_CLASSIFICATION
 @pytest.mark.filterwarnings('ignore')
 def test_autosklearn_to_mls():
     backend = create(
-        '/tmp/autosklearn_regression_example_tmp',
+        '/tmp/autosklearn_regression_example_tmp', # TODO use tempfile.TemporaryDirectory
         '/tmp/autosklearn_regression_example_out',
         delete_tmp_folder_after_terminate=True,
         delete_output_folder_after_terminate=True,
