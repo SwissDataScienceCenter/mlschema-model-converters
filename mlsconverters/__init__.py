@@ -3,15 +3,12 @@ import os
 import json
 from pathlib import Path
 from mls.config import MLS_DIR, MLS_METADATA_FILE
+from . import sklearn
 
 
 def _extract_mls(model):
     if model.__module__.startswith("sklearn"):
-        from . import sklearn
         return sklearn.to_mls(model)
-    elif model.__module__.startswith("autosklearn"):
-        from . import autosklearn
-        return autosklearn.to_mls(model)
     else:
         raise ValueError("Unsupported library")
 
