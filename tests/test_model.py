@@ -1,7 +1,8 @@
 import pytest
-from mlsconverters.sklearn import to_mls
+from mlsconverters import _extract_mls
 import json
 import itertools
+import tempfile
 
 from sklearn.linear_model import LogisticRegression, LogisticRegressionCV, \
     PassiveAggressiveClassifier, Perceptron, RidgeClassifier, RidgeClassifierCV, \
@@ -71,10 +72,36 @@ from scipy.stats import uniform
     GridSearchCV(SVC(), {'kernel':('linear', 'rbf'), 'C':[1, 10]}),
     Pipeline([('anova', SelectKBest(f_regression, k=1)), ('svc', SVC(kernel='linear'))]),
 ])
-def test_to_mls(sklearn_model):
+def test_sklearn_to_mls(sklearn_model):
     sklearn_model.fit(
         [[i+j, i+j] for i, j in itertools.product(range(5), range(3))],
         list(itertools.chain.from_iterable(itertools.repeat([0, 1, 2], 5)))
     )
-    s=json.dumps(to_mls(sklearn_model), allow_nan=False)
+    s=json.dumps(_extract_mls(sklearn_model), allow_nan=False)
     json.loads(s)
+
+
+from autosklearn.util.backend import create
+import autosklearn.automl
+import autosklearn.pipeline.util as putil
+from autosklearn.metrics import accuracy
+from autosklearn.constants import MULTICLASS_CLASSIFICATION
+
+@pytest.mark.filterwarnings('ignore')
+def test_autosklearn_to_mls():
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        backend = create(
+            tmp_dir + '_autosklearn_tmp/',
+            tmp_dir + '_autosklearn_out/',
+            delete_tmp_folder_after_terminate=True,
+            delete_output_folder_after_terminate=True,
+        )
+        X_train, Y_train, X_test, Y_test = putil.get_dataset('iris')
+        automl = autosklearn.automl.AutoML(backend, 20, 5)
+        automl.fit(
+            X_train, Y_train, metric=accuracy, task=MULTICLASS_CLASSIFICATION,
+        )
+        score = automl.score(X_test, Y_test)
+        s=json.dumps(_extract_mls(automl), allow_nan=False)
+        json.loads(s)
+        # TODO asserts?
