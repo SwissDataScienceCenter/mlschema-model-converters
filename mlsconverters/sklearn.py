@@ -1,4 +1,4 @@
-from mls.models import Algorithm, HyperParameter, HyperParameterSetting, Implementation, Run
+from renkumls.models import Algorithm, HyperParameter, HyperParameterSetting, Implementation, Run
 import sklearn
 import json
 import numpy as np

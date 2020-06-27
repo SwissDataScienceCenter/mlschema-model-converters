@@ -1,7 +1,7 @@
 import os
 from setuptools import find_packages, setup
 
-install_requires = ['mls', 'scikit-learn']
+install_requires = ['renku-mls', 'scikit-learn']
 packages = find_packages()
 version_file = open('VERSION')
 
