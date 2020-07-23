@@ -1,26 +1,36 @@
-from renkumls.models import Algorithm, HyperParameter, HyperParameterSetting, Implementation, Run
+from .models import Algorithm, HyperParameter, HyperParameterSetting, Implementation, Run, RunSchema, ModelEvaluation, EvaluationMeasure
 import sklearn
 import json
 import numpy as np
+from uuid import uuid1
 from scipy.stats._distn_infrastructure import rv_frozen
 
-def to_mls(sklearn_model: sklearn.base.BaseEstimator):
+EVALUATION_MEASURE_KEY = 'evaluation_measure'
+
+
+def evaluation_measure(func, value):
+    if (hasattr(func, "__qualname__")):
+        if func.__qualname__ == 'accuracy_score':
+            return ModelEvaluation(
+                value=value,
+                specified_by=EvaluationMeasure(_id="http://www.w3.org/ns/mls#accuracy")
+            )
+        elif func.__qualname__ == 'roc_auc_score':
+            return ModelEvaluation(
+                value=value,
+                specified_by=EvaluationMeasure(_id="http://www.w3.org/ns/mls#auROC")
+            )
+        elif func.__qualname__ == 'f1_score':
+            return ModelEvaluation(
+                value=value,
+                specified_by=EvaluationMeasure(_id="http://www.w3.org/ns/mls#F1")
+            )
+        else:
+            raise ValueError("unsupported evaluation measure")
+
+
+def to_mls(sklearn_model: sklearn.base.BaseEstimator, **kwargs):
     params = sklearn_model.get_params()
-
-    def blank_node(id):
-        return "_:{}".format(id)
-
-    def xsd_type(v):
-        xsd_type = "xsd:anyURI"
-        if type(v) == bool:
-            xsd_type = "xsd:boolean"
-        elif type(v) == int:
-            xsd_type = "xsd:int"
-        elif type(v) == float:
-            xsd_type = "xsd:float"
-        elif type(v) == str:
-            xsd_type = "xsd:string"
-        return {'@type': xsd_type, '@value': v}
 
     def normalize_float(v):
         if isinstance(v, float) and (np.isnan(v) or np.isinf(v)):
@@ -59,18 +69,27 @@ def to_mls(sklearn_model: sklearn.base.BaseEstimator):
 
     params = deep_get_params(params)
 
-    model_class = "_:{}.{}".format(type(sklearn_model).__module__, type(sklearn_model).__name__)
+    model_class = "{}.{}".format(type(sklearn_model).__module__, type(sklearn_model).__name__)
+    algo = Algorithm(_id=model_class)
 
-    model = Run()
+    implementation = Implementation(
+        _id=model_class,
+        name="asdf",
+        parameters=[HyperParameter(_id=key) for key in params.keys()],
+        implements=algo,
+        version="1.1.1"
+    )
 
-    implementation = Implementation(id=model_class)
-    implementation.parameters = [HyperParameter(id=blank_node(key)) for key in params.keys()]
-    implementation.implements = Algorithm(id=model_class)
-    model.executes = implementation
-
-    model.input_values = [
-        HyperParameterSetting(value=val, specified_by={"@id": blank_node(key)})
+    input_values = [
+        HyperParameterSetting(value=val, specified_by=HyperParameter(_id=key))
         for key, val in params.items() if val is not None
     ]
 
-    return model.asjsonld()
+    output_values = []
+    if EVALUATION_MEASURE_KEY in kwargs:
+        eval_measure = kwargs[EVALUATION_MEASURE_KEY]
+        output_values.append(
+            evaluation_measure(eval_measure[0], eval_measure[1])
+        )
+    model = Run("asdf", implementation, input_values, output_values, algo, "1.1.1", "")
+    return RunSchema().dumps(model)
