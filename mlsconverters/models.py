@@ -126,7 +126,7 @@ class HyperParameterSettingSchema(JsonLDSchema):
 class Implementation:
     """Repesent an ML Schema defined Model."""
 
-    def __init__(self, _id, name, parameters, implements, version):
+    def __init__(self, _id, parameters, implements, version, name=None):
         self._id = _id
         self.name = name
         self.parameters = parameters
@@ -148,7 +148,7 @@ class ImplementationSchema(JsonLDSchema):
 
 
 class Run:
-    def __init__(self, _id, executes, input_values, output_values, realizes, version=None, name=None):
+    def __init__(self, _id, executes=None, input_values=[], output_values=[], realizes=None, version=None, name=None):
         self._id = _id
         self.executes = executes
         self.input_values = input_values

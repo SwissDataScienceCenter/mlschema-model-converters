@@ -1,7 +1,7 @@
 import os
 from setuptools import find_packages, setup
 
-install_requires = ['calamus']
+install_requires = ['calamus>=0.3.3', 'gorilla']
 packages = find_packages()
 version_file = open('VERSION')
 

@@ -2,8 +2,8 @@ from .models import Algorithm, HyperParameter, HyperParameterSetting, Implementa
 import sklearn
 import json
 import numpy as np
-from uuid import uuid1
 from scipy.stats._distn_infrastructure import rv_frozen
+
 
 EVALUATION_MEASURE_KEY = 'evaluation_measure'
 
@@ -74,10 +74,9 @@ def to_mls(sklearn_model: sklearn.base.BaseEstimator, **kwargs):
 
     implementation = Implementation(
         _id=model_class,
-        name="asdf",
         parameters=[HyperParameter(_id=key) for key in params.keys()],
         implements=algo,
-        version="1.1.1"
+        version=sklearn.__version__
     )
 
     input_values = [
@@ -91,5 +90,5 @@ def to_mls(sklearn_model: sklearn.base.BaseEstimator, **kwargs):
         output_values.append(
             evaluation_measure(eval_measure[0], eval_measure[1])
         )
-    model = Run("asdf", implementation, input_values, output_values, algo, "1.1.1", "")
+    model = Run(sklearn_model.__hash__(), implementation, input_values, output_values, algo)
     return RunSchema().dumps(model)

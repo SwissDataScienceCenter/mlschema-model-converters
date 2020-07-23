@@ -77,4 +77,7 @@ def test_to_mls(sklearn_model):
         list(itertools.chain.from_iterable(itertools.repeat([0, 1, 2], 5)))
     )
     s=json.dumps(to_mls(sklearn_model), allow_nan=False)
+    if isinstance(sklearn_model, LogisticRegression):
+        with open('asdf', 'w') as f:
+            f.write(to_mls(sklearn_model))
     json.loads(s)
