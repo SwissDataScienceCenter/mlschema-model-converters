@@ -23,8 +23,8 @@ import marshmallow.fields as msmlfields
 from calamus.fields import _JsonLDField
 
 
-ML_SCHEMA = fields.Namespace("http://www.w3.org/ns/mls/")
-XML_SCHEMA = fields.Namespace('http://www.w3.org/2001/XMLSchema')
+ML_SCHEMA = fields.Namespace("http://www.w3.org/ns/mls#")
+XML_SCHEMA = fields.Namespace('http://www.w3.org/2001/XMLSchema#')
 DC_TERMS = fields.Namespace('http://purl.org/dc/terms/')
 
 class ParameterValue(_JsonLDField, msmlfields.Field):
