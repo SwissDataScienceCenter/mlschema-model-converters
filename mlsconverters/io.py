@@ -23,4 +23,4 @@ def log_renku_mls(mls, hash, force=False):
 
     path = path / MLS_METADATA_FILE
     with path.open(mode='w') as f:
-        json.dump(mls.asjsonld(), f)
+        f.write(mls)
