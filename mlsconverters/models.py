@@ -26,6 +26,7 @@ from calamus.fields import _JsonLDField
 ML_SCHEMA = fields.Namespace("http://www.w3.org/ns/mls#")
 XML_SCHEMA = fields.Namespace('http://www.w3.org/2001/XMLSchema#')
 DC_TERMS = fields.Namespace('http://purl.org/dc/terms/')
+RDFS = fields.Namespace("http://www.w3.org/2000/01/rdf-schema#")
 
 class ParameterValue(_JsonLDField, msmlfields.Field):
     def __init__(self, *args, **kwargs):
@@ -36,7 +37,7 @@ class ParameterValue(_JsonLDField, msmlfields.Field):
         if self.parent.opts.add_value_types:
             xsd_type = "xsd:anyURI"
             if type(value) == bool:
-                    xsd_type = "xsd:boolean"
+                xsd_type = "xsd:boolean"
             elif type(value) == int:
                 xsd_type = "xsd:int"
             elif type(value) == float:
@@ -64,56 +65,61 @@ class EvaluationMeasureSchema(JsonLDSchema):
 
 
 class ModelEvaluation:
-    def __init__(self, value, specified_by):
+    def __init__(self, _id, value, specified_by):
+        self._id = _id
         self.value = value
         self.specified_by = specified_by
 
 
 class ModelEvaluationSchema(JsonLDSchema):
+    _id = fields.Id()
     value = ParameterValue(ML_SCHEMA.hasValue)
     specified_by = fields.Nested(ML_SCHEMA.specifiedBy, EvaluationMeasureSchema)
 
     class Meta:
         rdf_type = ML_SCHEMA.ModelEvaluation
         model = ModelEvaluation
-        id_generation_strategy = blank_node_id_strategy
 
 
 class HyperParameter:
-    def __init__(self, _id):
-        self._id = _id
+    def __init__(self, _id, model_hash):
+        self._id = "http://www.w3.org/ns/mls#HyperParameter.{}.{}".format(_id, model_hash)
+        self.label = _id
 
 
 class HyperParameterSchema(JsonLDSchema):
-    _id = fields.BlankNodeId()
+    _id = fields.Id()
+    label = fields.String(RDFS.label)
 
     class Meta:
         rdf_type = ML_SCHEMA.HyperParameter
         model = HyperParameter
-        id_generation_strategy = blank_node_id_strategy
 
 
 class Algorithm:
     def __init__(self, _id):
         self._id = _id
+        self.label = _id
 
 
 class AlgorithmSchema(JsonLDSchema):
-    _id = fields.BlankNodeId()
+    _id = fields.Id()
+    label = fields.String(RDFS.label)
 
     class Meta:
         rdf_type = ML_SCHEMA.Algorithm
         model = Algorithm
-        id_generation_strategy = blank_node_id_strategy
 
 
 class HyperParameterSetting:
-    def __init__(self, value, specified_by):
+    def __init__(self, value, specified_by, model_hash):
+        self._id = "http://www.w3.org/ns/mls#HyperParameter.{}.{}".format(specified_by.label, model_hash)
         self.value = value
         self.specified_by = specified_by
 
 
 class HyperParameterSettingSchema(JsonLDSchema):
+    _id = fields.Id()
     value = ParameterValue(ML_SCHEMA.hasValue)
     specified_by = fields.Nested(ML_SCHEMA.specifiedBy, HyperParameterSchema(only=("_id",)))
 
@@ -126,7 +132,7 @@ class HyperParameterSettingSchema(JsonLDSchema):
 class Implementation:
     """Repesent an ML Schema defined Model."""
 
-    def __init__(self, _id, parameters, implements, version, name=None):
+    def __init__(self, _id, parameters, implements=None, version=None, name=None):
         self._id = _id
         self.name = name
         self.parameters = parameters
@@ -135,7 +141,7 @@ class Implementation:
 
 
 class ImplementationSchema(JsonLDSchema):
-    _id = fields.BlankNodeId()
+    _id = fields.Id()
     name = fields.String(DC_TERMS.title)
     parameters = fields.Nested(ML_SCHEMA.hasHyperParameter, HyperParameterSchema, many=True)
     implements = fields.Nested(ML_SCHEMA.implements, AlgorithmSchema)
@@ -144,7 +150,6 @@ class ImplementationSchema(JsonLDSchema):
     class Meta:
         rdf_type = ML_SCHEMA.Implementation
         model = Implementation
-        id_generation_strategy = blank_node_id_strategy
 
 
 class Run:

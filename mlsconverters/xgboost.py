@@ -1,10 +1,9 @@
+import json
 from .models import Algorithm, HyperParameter, HyperParameterSetting, Implementation, Run, RunSchema, ModelEvaluation, EvaluationMeasure
 from .common import normalize_float, generate_unique_id
-import sklearn
-import json
-import numpy as np
 
-from scipy.stats._distn_infrastructure import rv_frozen
+import xgboost
+import numpy as np
 
 
 EVALUATION_MEASURE_KEY = 'evaluation_measure'
@@ -34,8 +33,8 @@ def evaluation_measure(func, value):
             raise ValueError("unsupported evaluation measure")
 
 
-def to_mls(sklearn_model: sklearn.base.BaseEstimator, **kwargs):
-    params = sklearn_model.get_params()
+def to_mls(xgboost_model: xgboost.XGBModel, **kwargs):
+    params = xgboost_model.get_params()
 
     def standardize_types(v):
         if isinstance(v, np.ndarray):
@@ -44,8 +43,6 @@ def to_mls(sklearn_model: sklearn.base.BaseEstimator, **kwargs):
             return normalize_float(v)
         elif callable(v):
             return str(v) # TODO
-        elif isinstance(v, rv_frozen):
-            return {'dist_name': v.dist.name, 'args': v.args, 'kwds': v.kwds}
         return v
 
     def deep_get_params(params):
@@ -67,15 +64,15 @@ def to_mls(sklearn_model: sklearn.base.BaseEstimator, **kwargs):
                     raise NotImplementedError("can't convert sklearn model of type {} to mls: {}".format(type(sklearn_model), e))
 
     params = deep_get_params(params)
-    model_hash = sklearn_model.__hash__()
-    model_class = "{}.{}".format(type(sklearn_model).__module__, type(sklearn_model).__name__)
+    model_hash = xgboost_model.__hash__()
+    model_class = "{}.{}".format(type(xgboost_model).__module__, type(xgboost_model).__name__)
     algo = Algorithm(_id=model_class)
 
     implementation = Implementation(
         _id = generate_unique_id("http://www.w3.org/ns/mls#Implementation"),
         parameters=[HyperParameter(key, model_hash=model_hash) for key in params.keys()],
         implements=algo,
-        version=sklearn.__version__
+        version=xgboost.__version__
     )
 
     input_values = [

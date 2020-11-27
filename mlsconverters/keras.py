@@ -1,5 +1,5 @@
 import gorilla
-from .models import Algorithm, HyperParameter, HyperParameterSetting, Implementation, Run, RunSchema, ModelEvaluation, EvaluationMeasure
+from .models import Algorithm, Implementation, Run, RunSchema, ModelEvaluation, EvaluationMeasure
 from .common import fn_args_as_params, mls_add_param
 from .io import log_renku_mls
 from distutils.version import LooseVersion
@@ -77,7 +77,7 @@ def autolog():
         model_class = "keras.Model"
 
         algo = Algorithm(_id="NeuralNetwork")
-        params, input_values = fn_args_as_params(original, args, kwargs, unlogged_params)
+        params, input_values = fn_args_as_params(original, args, kwargs, mls_callback.mls._id, unlogged_params)
         mls_implementation = Implementation(
             model_class,
             params,
@@ -106,7 +106,7 @@ def autolog():
 
         history = original(self, *args, **kwargs)
 
-        log_renku_mls(RunSchema().dumps(mls_callback.mls), str(self.__hash__()))
+        log_renku_mls(RunSchema().dumps(mls_callback.mls), str(self.__hash__()), force=True)
 
         return history
 
