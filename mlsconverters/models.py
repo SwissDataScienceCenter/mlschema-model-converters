@@ -121,7 +121,7 @@ class HyperParameterSetting:
 class HyperParameterSettingSchema(JsonLDSchema):
     _id = fields.Id()
     value = ParameterValue(ML_SCHEMA.hasValue)
-    specified_by = fields.Nested(ML_SCHEMA.specifiedBy, HyperParameterSchema(only=("_id",)))
+    specified_by = fields.Nested(ML_SCHEMA.specifiedBy, HyperParameterSchema, only=("_id",))
 
     class Meta:
         rdf_type = ML_SCHEMA.HyperParameterSetting
