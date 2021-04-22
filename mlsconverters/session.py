@@ -1,4 +1,13 @@
-from .models import Algorithm, HyperParameter, HyperParameterSetting, Implementation, Run, RunSchema, ModelEvaluation, EvaluationMeasure
+from .models import (
+    Algorithm,
+    HyperParameter,
+    HyperParameterSetting,
+    Implementation,
+    Run,
+    RunSchema,
+    ModelEvaluation,
+    EvaluationMeasure,
+)
 from . import io
 from .common import generate_unique_id
 
@@ -21,13 +30,14 @@ class Session:
         for k, v in self._hp.items():
             hp = HyperParameter(k, model_hash=self._run._id)
             params.append(hp)
-            self._run.input_values.append(HyperParameterSetting(
-                v, hp, model_hash=self._run._id)
+            self._run.input_values.append(
+                HyperParameterSetting(v, hp, model_hash=self._run._id)
             )
         self._run.executes = Implementation(
             generate_unique_id("http://www.w3.org/ns/mls#Implementation"),
             params,
-            implements=self._run.realizes)
+            implements=self._run.realizes,
+        )
         io.log_renku_mls(RunSchema().dumps(self._run), str(self._run_id), force=True)
 
     def param(self, param_name, value):
@@ -42,6 +52,8 @@ class Session:
             ModelEvaluation(
                 _id=_id,
                 value=value,
-                specified_by=EvaluationMeasure(_id="http://www.w3.org/ns/mls#{}".format(metric_name))
+                specified_by=EvaluationMeasure(
+                    _id="http://www.w3.org/ns/mls#{}".format(metric_name)
+                ),
             )
         )

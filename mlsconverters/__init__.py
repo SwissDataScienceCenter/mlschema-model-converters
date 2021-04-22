@@ -5,12 +5,15 @@ from . import io
 from .decorators import params
 from .session import Session
 
+
 def _extract_mls(model, **kwargs):
     if model.__module__.startswith("sklearn"):
         from . import sklearn
+
         return sklearn.to_mls(model, **kwargs)
     elif model.__module__.startswith("xgboost"):
         from . import xgboost
+
         return xgboost.to_mls(model, **kwargs)
     else:
         raise ValueError("Unsupported library")
@@ -18,7 +21,7 @@ def _extract_mls(model, **kwargs):
 
 def export_to_file(model, filename, **kwargs):
     mls = _extract_mls(model, **kwargs)
-    with open(filename, 'w') as f:
+    with open(filename, "w") as f:
         f.write(mls)
 
 

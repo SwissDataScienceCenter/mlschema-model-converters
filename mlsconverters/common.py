@@ -25,17 +25,20 @@ def mls_params(params, run_id):
         if value is not None:
             mls_input_values.append(
                 HyperParameterSetting(
-                    value=_jsonize_value(value),
-                    specified_by=hp,
-                    model_hash=run_id)
+                    value=_jsonize_value(value), specified_by=hp, model_hash=run_id
+                )
             )
     return mls_parameters, mls_input_values
 
 
 def mls_param(key, value, run_id):
     hp = HyperParameter(key, model_hash=run_id)
-    return hp, HyperParameterSetting(
-        value=xsd_type(_jsonize_value(value)), specified_by=hp, model_hash=run_id)
+    return (
+        hp,
+        HyperParameterSetting(
+            value=xsd_type(_jsonize_value(value)), specified_by=hp, model_hash=run_id
+        ),
+    )
 
 
 # TODO: once PR #1 merged this should be dropped
@@ -52,7 +55,10 @@ def mls_add_params(mls, params):
         if value is not None:
             mls.input_values.append(
                 HyperParameterSetting(
-                    value=xsd_type(_jsonize_value(value)), specified_by=hp, model_hash=mls._id)
+                    value=xsd_type(_jsonize_value(value)),
+                    specified_by=hp,
+                    model_hash=mls._id,
+                )
             )
 
 
@@ -66,10 +72,12 @@ def xsd_type(v):
         xsd_type = "xsd:float"
     elif type(v) == str:
         xsd_type = "xsd:string"
-    return {'@type': xsd_type, '@value': v}
+    return {"@type": xsd_type, "@value": v}
 
 
-def get_unspecified_default_args(user_args, user_kwargs, all_param_names, all_default_values):
+def get_unspecified_default_args(
+    user_args, user_kwargs, all_param_names, all_default_values
+):
     num_args_without_default_value = len(all_param_names) - len(all_default_values)
 
     # all_default_values correspond to the last len(all_default_values) elements of the arguments
@@ -84,19 +92,26 @@ def get_unspecified_default_args(user_args, user_kwargs, all_param_names, all_de
 
     # This checks if the user passed values for arguments with default values
     if num_user_args > num_args_without_default_value:
-        num_default_args_passed_as_positional = num_user_args - num_args_without_default_value
+        num_default_args_passed_as_positional = (
+            num_user_args - num_args_without_default_value
+        )
         # Adding the set of positional arguments that should not be logged with default values
         names_to_exclude = default_param_names[:num_default_args_passed_as_positional]
         user_specified_arg_names.update(names_to_exclude)
 
-    return {name: value for name, value in default_args.items()
-            if name not in user_specified_arg_names}
+    return {
+        name: value
+        for name, value in default_args.items()
+        if name not in user_specified_arg_names
+    }
 
 
 def fn_args_as_params(fn, args, kwargs, run_id, unlogged=[]):  # pylint: disable=W0102
     # all_default_values has length n, corresponding to values of the
     # last n elements in all_param_names
-    pos_params, _, _, pos_defaults, kw_params, kw_defaults, _ = inspect.getfullargspec(fn)
+    pos_params, _, _, pos_defaults, kw_params, kw_defaults, _ = inspect.getfullargspec(
+        fn
+    )
 
     kw_params = list(kw_params) if kw_params else []
     pos_defaults = list(pos_defaults) if pos_defaults else []
@@ -109,7 +124,9 @@ def fn_args_as_params(fn, args, kwargs, run_id, unlogged=[]):  # pylint: disable
     # empty argspec for certain functions, despite the functions having an argspec.
     if all_default_values is not None and len(all_default_values) > 0:
         # Logging the default arguments not passed by the user
-        defaults = get_unspecified_default_args(args, kwargs, all_param_names, all_default_values)
+        defaults = get_unspecified_default_args(
+            args, kwargs, all_param_names, all_default_values
+        )
 
         for name in [name for name in defaults.keys() if name in unlogged]:
             del defaults[name]
@@ -118,10 +135,11 @@ def fn_args_as_params(fn, args, kwargs, run_id, unlogged=[]):  # pylint: disable
         input_values.append(iv)
 
     # Logging the arguments passed by the user
-    args_dict = dict((param_name, param_val) for param_name, param_val
-                     in zip(all_param_names, args)
-                     if param_name not in unlogged)
-
+    args_dict = dict(
+        (param_name, param_val)
+        for param_name, param_val in zip(all_param_names, args)
+        if param_name not in unlogged
+    )
 
     if args_dict:
         p, iv = mls_params(args_dict, run_id)

@@ -24,9 +24,10 @@ from calamus.fields import _JsonLDField
 
 
 ML_SCHEMA = fields.Namespace("http://www.w3.org/ns/mls#")
-XML_SCHEMA = fields.Namespace('http://www.w3.org/2001/XMLSchema#')
-DC_TERMS = fields.Namespace('http://purl.org/dc/terms/')
+XML_SCHEMA = fields.Namespace("http://www.w3.org/2001/XMLSchema#")
+DC_TERMS = fields.Namespace("http://purl.org/dc/terms/")
 RDFS = fields.Namespace("http://www.w3.org/2000/01/rdf-schema#")
+
 
 class ParameterValue(_JsonLDField, msmlfields.Field):
     def __init__(self, *args, **kwargs):
@@ -44,7 +45,7 @@ class ParameterValue(_JsonLDField, msmlfields.Field):
                 xsd_type = "xsd:float"
             elif type(value) == str:
                 xsd_type = "xsd:string"
-            value = {'@type': xsd_type, '@value': value}
+            value = {"@type": xsd_type, "@value": value}
         return value
 
     def _deserialize(self, value, attr, data, **kwargs):
@@ -55,6 +56,7 @@ class ParameterValue(_JsonLDField, msmlfields.Field):
 class EvaluationMeasure:
     def __init__(self, _id):
         self._id = _id
+
 
 class EvaluationMeasureSchema(JsonLDSchema):
     _id = fields.Id()
@@ -83,7 +85,9 @@ class ModelEvaluationSchema(JsonLDSchema):
 
 class HyperParameter:
     def __init__(self, _id, model_hash):
-        self._id = "http://www.w3.org/ns/mls#HyperParameter.{}.{}".format(_id, model_hash)
+        self._id = "http://www.w3.org/ns/mls#HyperParameter.{}.{}".format(
+            _id, model_hash
+        )
         self.label = _id
 
 
@@ -121,7 +125,9 @@ class HyperParameterSetting:
 class HyperParameterSettingSchema(JsonLDSchema):
     _id = fields.Id()
     value = ParameterValue(ML_SCHEMA.hasValue)
-    specified_by = fields.Nested(ML_SCHEMA.specifiedBy, HyperParameterSchema, only=("_id",))
+    specified_by = fields.Nested(
+        ML_SCHEMA.specifiedBy, HyperParameterSchema, only=("_id",)
+    )
 
     class Meta:
         rdf_type = ML_SCHEMA.HyperParameterSetting
@@ -143,7 +149,9 @@ class Implementation:
 class ImplementationSchema(JsonLDSchema):
     _id = fields.Id()
     name = fields.String(DC_TERMS.title)
-    parameters = fields.Nested(ML_SCHEMA.hasHyperParameter, HyperParameterSchema, many=True)
+    parameters = fields.Nested(
+        ML_SCHEMA.hasHyperParameter, HyperParameterSchema, many=True
+    )
     implements = fields.Nested(ML_SCHEMA.implements, AlgorithmSchema)
     version = fields.String(DC_TERMS.hasVersion)
 
@@ -153,7 +161,16 @@ class ImplementationSchema(JsonLDSchema):
 
 
 class Run:
-    def __init__(self, _id, executes=None, input_values=[], output_values=[], realizes=None, version=None, name=None):
+    def __init__(
+        self,
+        _id,
+        executes=None,
+        input_values=[],
+        output_values=[],
+        realizes=None,
+        version=None,
+        name=None,
+    ):
         self._id = _id
         self.executes = executes
         self.input_values = input_values
@@ -166,7 +183,9 @@ class Run:
 class RunSchema(JsonLDSchema):
     _id = fields.Id()
     executes = fields.Nested(ML_SCHEMA.executes, ImplementationSchema)
-    input_values = fields.Nested(ML_SCHEMA.hasInput, HyperParameterSettingSchema, many=True, flattened=True)
+    input_values = fields.Nested(
+        ML_SCHEMA.hasInput, HyperParameterSettingSchema, many=True, flattened=True
+    )
     output_values = fields.Nested(ML_SCHEMA.hasOutput, ModelEvaluationSchema, many=True)
     realizes = fields.Nested(ML_SCHEMA.implements, AlgorithmSchema)
     version = fields.String(DC_TERMS.hasVersion)
@@ -175,4 +194,3 @@ class RunSchema(JsonLDSchema):
     class Meta:
         rdf_type = ML_SCHEMA.Run
         model = Run
-
