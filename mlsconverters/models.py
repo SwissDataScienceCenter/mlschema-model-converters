@@ -113,7 +113,7 @@ class AlgorithmSchema(JsonLDSchema):
 
 class HyperParameterSetting:
     def __init__(self, value, specified_by, model_hash):
-        self._id = "http://www.w3.org/ns/mls#HyperParameter.{}.{}".format(specified_by.label, model_hash)
+        self._id = f"http://www.w3.org/ns/mls#HyperParameterSetting.{specified_by.label}.{model_hash}"
         self.value = value
         self.specified_by = specified_by
 

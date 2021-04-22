@@ -1,7 +1,7 @@
 import os
 from setuptools import find_packages, setup
 
-install_requires = ['calamus>=0.3.3', 'gorilla']
+install_requires = ['calamus>=0.3.3', 'gorilla', 'numpy']
 packages = find_packages()
 version_file = open('VERSION')
 
