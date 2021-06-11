@@ -73,7 +73,7 @@ def to_mls(xgboost_model: xgboost.XGBModel, **kwargs):
                 except TypeError as e:
                     raise NotImplementedError(
                         "can't convert sklearn model of type {} to mls: {}".format(
-                            type(sklearn_model), e
+                            type(xgboost_model), e
                         )
                     )
 
