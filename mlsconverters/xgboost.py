@@ -1,19 +1,12 @@
 import json
-from .models import (
-    Algorithm,
-    HyperParameter,
-    HyperParameterSetting,
-    Implementation,
-    Run,
-    RunSchema,
-    ModelEvaluation,
-    EvaluationMeasure,
-)
-from .common import normalize_float, generate_unique_id
 
-import xgboost
 import numpy as np
+import xgboost
 
+from .common import generate_unique_id, normalize_float
+from .models import (Algorithm, EvaluationMeasure, HyperParameter,
+                     HyperParameterSetting, Implementation, ModelEvaluation,
+                     Run, RunSchema)
 
 EVALUATION_MEASURE_KEY = "evaluation_measure"
 

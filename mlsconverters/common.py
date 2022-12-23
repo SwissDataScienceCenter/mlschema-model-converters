@@ -1,7 +1,9 @@
 import inspect
-import numpy as np
-from .models import HyperParameter, HyperParameterSetting
 from uuid import uuid1
+
+import numpy as np
+
+from .models import HyperParameter, HyperParameterSetting
 
 
 def _jsonize_value(value):
