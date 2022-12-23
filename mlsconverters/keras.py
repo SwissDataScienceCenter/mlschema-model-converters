@@ -1,16 +1,12 @@
-import gorilla
-from .models import (
-    Algorithm,
-    Implementation,
-    Run,
-    RunSchema,
-    ModelEvaluation,
-    EvaluationMeasure,
-)
-from .common import fn_args_as_params, mls_add_param
-from .io import log_renku_mls
 from distutils.version import LooseVersion
 from uuid import uuid1
+
+import gorilla
+
+from .common import fn_args_as_params, mls_add_param
+from .io import log_renku_mls
+from .models import (Algorithm, EvaluationMeasure, Implementation,
+                     ModelEvaluation, Run, RunSchema)
 
 
 def autolog():

@@ -17,11 +17,11 @@
 # limitations under the License.
 
 import json
+
 import calamus.fields as fields
-from calamus.schema import JsonLDSchema, blank_node_id_strategy
 import marshmallow.fields as msmlfields
 from calamus.fields import _JsonLDField
-
+from calamus.schema import JsonLDSchema, blank_node_id_strategy
 
 ML_SCHEMA = fields.Namespace("http://www.w3.org/ns/mls#")
 XML_SCHEMA = fields.Namespace("http://www.w3.org/2001/XMLSchema#")

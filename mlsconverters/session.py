@@ -1,17 +1,10 @@
-from .models import (
-    Algorithm,
-    HyperParameter,
-    HyperParameterSetting,
-    Implementation,
-    Run,
-    RunSchema,
-    ModelEvaluation,
-    EvaluationMeasure,
-)
+from uuid import uuid1
+
 from . import io
 from .common import generate_unique_id
-
-from uuid import uuid1
+from .models import (Algorithm, EvaluationMeasure, HyperParameter,
+                     HyperParameterSetting, Implementation, ModelEvaluation,
+                     Run, RunSchema)
 
 
 class Session:

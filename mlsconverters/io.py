@@ -1,6 +1,9 @@
 import os
-import json
 from pathlib import Path
+
+import psutil
+from renku.core.util.contexts import renku_project_context
+from renku.domain_model.project_context import project_context
 
 MLS_DIR = "ml"
 ENV_RENKU_HOME = "RENKU_HOME"
@@ -8,11 +11,19 @@ COMMON_DIR = "latest"
 
 
 def log_renku_mls(mls, hash, force=False):
-    if ENV_RENKU_HOME in os.environ:
-        renku_project_root = os.environ[ENV_RENKU_HOME]
-    elif force:
-        # hope for the best...
-        renku_project_root = ".renku"
+    inside_renku = False
+
+    parent = psutil.Process().parent()
+
+    while parent is not None:
+        if parent.name() == "renku" or "renku.ui.cli" in parent.cmdline():
+            inside_renku = True
+            break
+        parent = parent.parent()
+
+    if force or inside_renku:
+        with renku_project_context("."):
+            renku_project_root = project_context.metadata_path
     else:
         # we are not running as part of renku run
         # hence NOP

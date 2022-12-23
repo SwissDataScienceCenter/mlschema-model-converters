@@ -1,20 +1,13 @@
-from .models import (
-    Algorithm,
-    HyperParameter,
-    HyperParameterSetting,
-    Implementation,
-    Run,
-    RunSchema,
-    ModelEvaluation,
-    EvaluationMeasure,
-)
-from .common import normalize_float, generate_unique_id
-import sklearn
 import json
-import numpy as np
 
+import numpy as np
+import sklearn
 from scipy.stats._distn_infrastructure import rv_frozen
 
+from .common import generate_unique_id, normalize_float
+from .models import (Algorithm, EvaluationMeasure, HyperParameter,
+                     HyperParameterSetting, Implementation, ModelEvaluation,
+                     Run, RunSchema)
 
 EVALUATION_MEASURE_KEY = "evaluation_measure"
 
